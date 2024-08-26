@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Health Monitor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --card-background: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card-background);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-title {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .card-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .card i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        #map {
+            height: 300px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Animal Health Monitor</h1>
+        <div class="dashboard">
+            <div class="card">
+                <i class="fas fa-thermometer-half"></i>
+                <div class="card-title">Temperature</div>
+                <div class="card-value"><span id="tempCelsius">--</span>°C</div>
+                <div class="card-value"><span id="tempFahrenheit">--</span>°F</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-heartbeat"></i>
+                <div class="card-title">Heart Rate</div>
+                <div class="card-value"><span id="bpm">--</span> BPM</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-lungs"></i>
+                <div class="card-title">Blood Oxygen</div>
+                <div class="card-value"><span id="spo2">--</span>%</div>
+            </div>
+            <div class="card">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="card-title">GPS Location</div>
+                <div class="card-value">
+                    <div>Lat: <span id="latitude">--</span></div>
+                    <div>Long: <span id="longitude">--</span></div>
+                </div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+    <script>
+        // Initialize Firebase (replace with your config)
+        const firebaseConfig = {
+            // Your Firebase configuration here
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Initialize Google Map
+        let map;
+        let marker;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 0, lng: 0},
+                zoom: 2
+            });
+            marker = new google.maps.Marker({
+                position: {lat: 0, lng: 0},
+                map: map
+            });
+        }
+
+        // Function to update the dashboard
+        function updateDashboard(data) {
+            document.getElementById('tempCelsius').textContent = data.temperature.toFixed(1);
+            document.getElementById('tempFahrenheit').textContent = (data.temperature * 9/5 + 32).toFixed(1);
+            document.getElementById('bpm').textContent = data.bpm;
+            document.getElementById('spo2').textContent = data.spo2;
+            document.getElementById('latitude').textContent = data.gps.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = data.gps.longitude.toFixed(6);
+
+            // Update map
+            const newPosition = new google.maps.LatLng(data.gps.latitude, data.gps.longitude);
+            marker.setPosition(newPosition);
+            map.panTo(newPosition);
+        }
+
+        // Listen for real-time updates
+        const animalDataRef = database.ref('animal_data');
+        animalDataRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                updateDashboard(data);
+            }
+        });
+    </script>
+</body>
+</html>
