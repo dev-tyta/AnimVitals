@@ -111,20 +111,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
     <script>
-        // Initialize Firebase (replace with your config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWotEpHjEN8i854vqV4nYqXAFTK6NzXTg",
-            authDomain: "animvitals.firebaseapp.com",
-            databaseURL: "https://animvitals-default-rtdb.firebaseio.com",
-            projectId: "animvitals",
-            storageBucket: "animvitals.appspot.com",
-            messagingSenderId: "688007377875",
-            appId: "1:688007377875:web:c4be0da1e3e2eb30c73526",
-            measurementId: "G-620RMN2J6Q"
-          };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
         // Initialize Google Map
         let map;
         let marker;
@@ -139,29 +125,47 @@
             });
         }
 
+        // Function to generate random values
+        function generateRandomValues() {
+            const tempCelsius = (Math.random() * 10 + 35).toFixed(1); // Random temperature between 35°C and 45°C
+            const tempFahrenheit = (tempCelsius * 9/5 + 32).toFixed(1);
+            const bpm = Math.floor(Math.random() * 60 + 60); // Random bpm between 60 and 120
+            const spo2 = Math.floor(Math.random() * 5 + 95); // Random spo2 between 95 and 100
+            const latitude = (Math.random() * 180 - 90).toFixed(6); // Random latitude between -90 and 90
+            const longitude = (Math.random() * 360 - 180).toFixed(6); // Random longitude between -180 and 180
+
+            return {
+                tempCelsius,
+                tempFahrenheit,
+                bpm,
+                spo2,
+                latitude,
+                longitude
+            };
+        }
+
         // Function to update the dashboard
-        function updateDashboard(data) {
-            document.getElementById('tempCelsius').textContent = data.temperature.toFixed(1);
-            document.getElementById('tempFahrenheit').textContent = (data.temperature * 9/5 + 32).toFixed(1);
+        function updateDashboard() {
+            const data = generateRandomValues();
+            
+            document.getElementById('tempCelsius').textContent = data.tempCelsius;
+            document.getElementById('tempFahrenheit').textContent = data.tempFahrenheit;
             document.getElementById('bpm').textContent = data.bpm;
             document.getElementById('spo2').textContent = data.spo2;
-            document.getElementById('latitude').textContent = data.gps.latitude.toFixed(6);
-            document.getElementById('longitude').textContent = data.gps.longitude.toFixed(6);
-
+            document.getElementById('latitude').textContent = data.latitude;
+            document.getElementById('longitude').textContent = data.longitude;
+            
             // Update map
-            const newPosition = new google.maps.LatLng(data.gps.latitude, data.gps.longitude);
+            const newPosition = new google.maps.LatLng(parseFloat(data.latitude), parseFloat(data.longitude));
             marker.setPosition(newPosition);
             map.panTo(newPosition);
         }
 
-        // Listen for real-time updates
-        const animalDataRef = database.ref('animal_data');
-        animalDataRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                updateDashboard(data);
-            }
-        });
+        // Update dashboard every 5 seconds
+        setInterval(updateDashboard, 5000);
+
+        // Initial update
+        updateDashboard();
     </script>
 </body>
 </html>
