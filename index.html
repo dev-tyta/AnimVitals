@@ -115,14 +115,20 @@
         let map;
         let marker;
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 0, lng: 0},
-                zoom: 2
-            });
-            marker = new google.maps.Marker({
-                position: {lat: 0, lng: 0},
-                map: map
-            });
+            try {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: 0, lng: 0},
+                    zoom: 2
+                });
+                marker = new google.maps.Marker({
+                    position: {lat: 0, lng: 0},
+                    map: map
+                });
+                console.log("Map initialized successfully");
+            } catch (error) {
+                console.error("Error initializing map:", error);
+                document.getElementById('map').innerHTML = '<p>Error loading map. Please check the console for details.</p>';
+            }
         }
 
         // Function to generate random values
@@ -155,17 +161,27 @@
             document.getElementById('latitude').textContent = data.latitude;
             document.getElementById('longitude').textContent = data.longitude;
             
-            // Update map
-            const newPosition = new google.maps.LatLng(parseFloat(data.latitude), parseFloat(data.longitude));
-            marker.setPosition(newPosition);
-            map.panTo(newPosition);
+            if (map && marker) {
+                try {
+                    const newPosition = new google.maps.LatLng(parseFloat(data.latitude), parseFloat(data.longitude));
+                    marker.setPosition(newPosition);
+                    map.panTo(newPosition);
+                } catch (error) {
+                    console.error("Error updating map:", error);
+                }
+            } else {
+                console.warn("Map or marker not initialized");
+            }
         }
+
 
         // Update dashboard every 5 seconds
         setInterval(updateDashboard, 5000);
 
-        // Initial update
-        updateDashboard();
+        window.onload = function() {
+            initMap();
+            updateDashboard();
+        };
     </script>
 </body>
     </html>
