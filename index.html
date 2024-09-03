@@ -135,8 +135,8 @@
     function generateRandomValues() {
         const latBase = 7.2297;
         const lngBase = 3.4392;
-        const latRange = 0.01; // Latitude range ±0.01 degrees
-        const lngRange = 0.01; // Longitude range ±0.01 degrees
+        const latRange = 0.001; // Latitude range ±0.01 degrees
+        const lngRange = 0.001; // Longitude range ±0.01 degrees
 
         const tempCelsius = (Math.random() * 10 + 35).toFixed(1); // Random temperature between 35°C and 45°C
         const tempFahrenheit = (tempCelsius * 9/5 + 32).toFixed(1);
@@ -182,7 +182,7 @@
     }
 
     // Update dashboard every 5 seconds
-    setInterval(updateDashboard, 5000);
+    setInterval(updateDashboard, 60000);
 
     window.onload = function() {
         initMap();
