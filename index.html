@@ -111,77 +111,83 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database-compat.min.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao&callback=initMap" async defer></script>
     <script>
-        // Initialize Google Map
-        let map;
-        let marker;
-        function initMap() {
-            try {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: {lat: 0, lng: 0},
-                    zoom: 2
-                });
-                marker = new google.maps.Marker({
-                    position: {lat: 0, lng: 0},
-                    map: map
-                });
-                console.log("Map initialized successfully");
-            } catch (error) {
-                console.error("Error initializing map:", error);
-                document.getElementById('map').innerHTML = '<p>Error loading map. Please check the console for details.</p>';
-            }
+    // Initialize Google Map
+    let map;
+    let marker;
+    function initMap() {
+        try {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 7.2297, lng: 3.4392}, // Center map at the original coordinates
+                zoom: 15 // Adjust zoom level to focus on the area
+            });
+            marker = new google.maps.Marker({
+                position: {lat: 7.2297, lng: 3.4392}, // Start marker at the original coordinates
+                map: map
+            });
+            console.log("Map initialized successfully");
+        } catch (error) {
+            console.error("Error initializing map:", error);
+            document.getElementById('map').innerHTML = '<p>Error loading map. Please check the console for details.</p>';
         }
+    }
 
-        // Function to generate random values
-        function generateRandomValues() {
-            const tempCelsius = (Math.random() * 10 + 35).toFixed(1); // Random temperature between 35°C and 45°C
-            const tempFahrenheit = (tempCelsius * 9/5 + 32).toFixed(1);
-            const bpm = Math.floor(Math.random() * 60 + 60); // Random bpm between 60 and 120
-            const spo2 = Math.floor(Math.random() * 5 + 95); // Random spo2 between 95 and 100
-            const latitude = (Math.random() * 180 - 90).toFixed(6); // Random latitude between -90 and 90
-            const longitude = (Math.random() * 360 - 180).toFixed(6); // Random longitude between -180 and 180
+    // Function to generate random values within a specific range around the given coordinates
+    function generateRandomValues() {
+        const latBase = 7.2297;
+        const lngBase = 3.4392;
+        const latRange = 0.01; // Latitude range ±0.01 degrees
+        const lngRange = 0.01; // Longitude range ±0.01 degrees
 
-            return {
-                tempCelsius,
-                tempFahrenheit,
-                bpm,
-                spo2,
-                latitude,
-                longitude
-            };
-        }
+        const tempCelsius = (Math.random() * 10 + 35).toFixed(1); // Random temperature between 35°C and 45°C
+        const tempFahrenheit = (tempCelsius * 9/5 + 32).toFixed(1);
+        const bpm = Math.floor(Math.random() * 60 + 60); // Random bpm between 60 and 120
+        const spo2 = Math.floor(Math.random() * 5 + 95); // Random spo2 between 95 and 100
 
-        // Function to update the dashboard
-        function updateDashboard() {
-            const data = generateRandomValues();
-            
-            document.getElementById('tempCelsius').textContent = data.tempCelsius;
-            document.getElementById('tempFahrenheit').textContent = data.tempFahrenheit;
-            document.getElementById('bpm').textContent = data.bpm;
-            document.getElementById('spo2').textContent = data.spo2;
-            document.getElementById('latitude').textContent = data.latitude;
-            document.getElementById('longitude').textContent = data.longitude;
-            
-            if (map && marker) {
-                try {
-                    const newPosition = new google.maps.LatLng(parseFloat(data.latitude), parseFloat(data.longitude));
-                    marker.setPosition(newPosition);
-                    map.panTo(newPosition);
-                } catch (error) {
-                    console.error("Error updating map:", error);
-                }
-            } else {
-                console.warn("Map or marker not initialized");
-            }
-        }
+        // Generate random latitude and longitude within the specified range
+        const latitude = (latBase + (Math.random() * latRange * 2 - latRange)).toFixed(6);
+        const longitude = (lngBase + (Math.random() * lngRange * 2 - lngRange)).toFixed(6);
 
-
-        // Update dashboard every 5 seconds
-        setInterval(updateDashboard, 5000);
-
-        window.onload = function() {
-            initMap();
-            updateDashboard();
+        return {
+            tempCelsius,
+            tempFahrenheit,
+            bpm,
+            spo2,
+            latitude,
+            longitude
         };
-    </script>
+    }
+
+    // Function to update the dashboard
+    function updateDashboard() {
+        const data = generateRandomValues();
+        
+        document.getElementById('tempCelsius').textContent = data.tempCelsius;
+        document.getElementById('tempFahrenheit').textContent = data.tempFahrenheit;
+        document.getElementById('bpm').textContent = data.bpm;
+        document.getElementById('spo2').textContent = data.spo2;
+        document.getElementById('latitude').textContent = data.latitude;
+        document.getElementById('longitude').textContent = data.longitude;
+        
+        if (map && marker) {
+            try {
+                const newPosition = new google.maps.LatLng(parseFloat(data.latitude), parseFloat(data.longitude));
+                marker.setPosition(newPosition);
+                map.panTo(newPosition);
+            } catch (error) {
+                console.error("Error updating map:", error);
+            }
+        } else {
+            console.warn("Map or marker not initialized");
+        }
+    }
+
+    // Update dashboard every 5 seconds
+    setInterval(updateDashboard, 5000);
+
+    window.onload = function() {
+        initMap();
+        updateDashboard();
+    };
+</script>
 </body>
     </html>
